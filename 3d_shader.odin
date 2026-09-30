@@ -60,45 +60,45 @@ void main() {
 }
 `
 compile_shader :: proc(source: string, shader_type: u32) -> (u32, bool) {
-    id:= gl.CreateShader(shader_type)
-    c_str:= strings.clone_to_cstring(source, context.temp_allocator)
-    gl.ShaderSource(id, 1, &c_str, nil)
-    gl.CompileShader(id)
+	id := gl.CreateShader(shader_type)
+	c_str := strings.clone_to_cstring(source, context.temp_allocator)
+	gl.ShaderSource(id, 1, &c_str, nil)
+	gl.CompileShader(id)
 
-    status: i32
-    gl.GetShaderiv(id, gl.COMPILE_STATUS, &status)
-    if status == 0 {
-        log_buf: [512]u8
-        gl.GetShaderInfoLog(id, 512, nil, raw_data(log_buf[:]))
-        fmt.eprintfln("3D Shader compile error: %s", string(log_buf[:]))
-        gl.DeleteShader(id)
-        return 0, false
-    }
-    return id, true
+	status: i32
+	gl.GetShaderiv(id, gl.COMPILE_STATUS, &status)
+	if status == 0 {
+		log_buf: [512]u8
+		gl.GetShaderInfoLog(id, 512, nil, raw_data(log_buf[:]))
+		fmt.eprintfln("3D Shader compile error: %s", string(log_buf[:]))
+		gl.DeleteShader(id)
+		return 0, false
+	}
+	return id, true
 }
 
 create_shader_program :: proc(vs_src, fs_src: string) -> (u32, bool) {
-    vs, vs_ok := compile_shader(vs_src, gl.VERTEX_SHADER)
-    if !vs_ok do return 0, false
-    defer gl.DeleteShader(vs)
+	vs, vs_ok := compile_shader(vs_src, gl.VERTEX_SHADER)
+	if !vs_ok do return 0, false
+	defer gl.DeleteShader(vs)
 
-    fs, fs_ok := compile_shader(fs_src, gl.FRAGMENT_SHADER)
-    if !fs_ok do return 0, false
-    defer gl.DeleteShader(fs)
+	fs, fs_ok := compile_shader(fs_src, gl.FRAGMENT_SHADER)
+	if !fs_ok do return 0, false
+	defer gl.DeleteShader(fs)
 
-    prog := gl.CreateProgram()
-    gl.AttachShader(prog, vs)
-    gl.AttachShader(prog, fs)
-    gl.LinkProgram(prog)
+	prog := gl.CreateProgram()
+	gl.AttachShader(prog, vs)
+	gl.AttachShader(prog, fs)
+	gl.LinkProgram(prog)
 
-    status: i32
-    gl.GetProgramiv(prog, gl.LINK_STATUS, &status)
-    if status == 0 {
-        log_buf: [512]u8
-        gl.GetProgramInfoLog(prog, 512, nil, raw_data(log_buf[:]))
-        fmt.eprintfln("3D Program link error: %s", string(log_buf[:]))
-        gl.DeleteProgram(prog)
-        return 0, false
-    }
-    return prog, true
+	status: i32
+	gl.GetProgramiv(prog, gl.LINK_STATUS, &status)
+	if status == 0 {
+		log_buf: [512]u8
+		gl.GetProgramInfoLog(prog, 512, nil, raw_data(log_buf[:]))
+		fmt.eprintfln("3D Program link error: %s", string(log_buf[:]))
+		gl.DeleteProgram(prog)
+		return 0, false
+	}
+	return prog, true
 }
